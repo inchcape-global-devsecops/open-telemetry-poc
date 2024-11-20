@@ -1,13 +1,12 @@
 const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { SimpleSpanProcessor, ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-base');
 const { Resource } = require('@opentelemetry/resources');
-const { trace, metrics } = require('@opentelemetry/api');
-const { PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+const { trace, metrics, diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+const { PeriodicExportingMetricReader, MeterProvider } = require('@opentelemetry/sdk-metrics');
 const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const {OTLPTraceExporter,} = require('@opentelemetry/exporter-trace-otlp-http');
-const {OTLPMetricExporter,} = require('@opentelemetry/exporter-trace-otlp-http');
 
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
 
 // Define resource metadata
 const resource = new Resource({
@@ -15,27 +14,34 @@ const resource = new Resource({
   'service.version': '0.1.0',
 });
 
+const prometheusExporter = new PrometheusExporter({
+  endpoint: '/metrics',
+  port: 9464,
+}, () => {
+  console.log('Prometheus scrape endpoint: http://localhost:9464/metrics');
+});
 
+const meterProvider = new MeterProvider({
+  resource,
+});
+
+meterProvider.addMetricReader(
+  prometheusExporter
+);
+
+metrics.setGlobalMeterProvider(meterProvider);
+
+console.log(prometheusExporter); // Verifica que sea una instancia válida
+
+
+// Configure the NodeSDK
 const sdk = new NodeSDK({
   resource,
-  metricReader: new PrometheusExporter({
-    port: 9464,
-  }),
-  traceExporter: new ConsoleSpanExporter(),
+  spanProcessor: new SimpleSpanProcessor(new ConsoleSpanExporter()), // For spans
   instrumentations: [getNodeAutoInstrumentations()],
 });
+
+
 sdk.start();
 console.log('Telemetry initialized successfully.');
 console.log('Prometheus metrics available at http://localhost:9464/metrics');
-
-
-
-
-
-
-
-
-
-
-
-

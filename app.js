@@ -1,48 +1,51 @@
-const {
-  SEMATTRS_CODE_FUNCTION, 
-  SEMATTRS_CODE_FILEPATH, 
- } = require('@opentelemetry/semantic-conventions');
+
 const express = require('express');
 const {rollTheDice} = require('./dice.js');
 const { trace, metrics} = require('@opentelemetry/api');
 
-//initialize tracesz
 const tracer = trace.getTracer('dice-server', '0.1.0');
 const meter = metrics.getMeter('dice-server', '0.1.0');
+
+const requestCounter = meter.createCounter('http_request_total', {
+  description: 'Total number of HTTP requests received'
+})
 
 const PORT = parseInt(process.env.PORT || '8080');
 const app = express();
 
 
+//path para lanzar dados
 app.get('/rolldice', (req, res) => {
-    const rolls = req.query.rolls ? parseInt(req.query.rolls.toString()) : NaN;
+    const rolls = parseInt(req.query.rolls || '1', 10);
     if (isNaN(rolls)) {
       res
         .status(400)
         .send("Request parameter 'rolls' is missing or not a number.");
       return;
     }
+
+    requestCounter.add(1, {route: '/rolldice' }); //incrementar metrica
     res.send(JSON.stringify(rollTheDice(rolls, 1, 6)));
   });
-
-app.listen(PORT, () => {
-  console.log(`Listening for requests on http://localhost:${PORT}`);
-});
 
 //using histograms
 
 app.get('/', (_req, _res) => {
-  const histogram = meter.createHistogram('task.duration');
+  const histogram = meter.createHistogram('api_response_time', {
+    description: 'api response time (ms)' 
+  });
   const startTime = new Date().getTime();
-
-  // do some work in an API call
-
-  const endTime = new Date().getTime();
-  const executionTime = endTime - startTime;
-
-  // Record the duration of the task operation
-  histogram.record(executionTime);
+  setTimeout(()=> {
+    const endTime = new Date().getTime();
+    console.log(`startTime (ms): ${startTime}`);
+    const executionTime = endTime - startTime;
+    histogram.record(executionTime); // registra duracion
+    _res.send(`Completed task: ${executionTime} ms.`);
+  }, Math.random() * 20000);
 });
 
+app.listen(PORT, () => {
+  console.log(`Listening for requests on http://localhost:${PORT}`);
+});
 
 

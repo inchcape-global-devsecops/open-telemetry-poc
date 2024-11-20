@@ -1,12 +1,10 @@
 global:
   scrape_interval: 15s #consultation time and metrics acquisition
-  evaluation_interval: 15s #rule evaluation time
-  scrape_timeout: 15s #max time wait to obtain metrics
 scrape_configs:
   - job_name: dice-service
     scrape_interval: 5s
     static_configs: 
-      - targets: [host.docker.internal:9464]
+      - targets: [172.17.0.1:9464]
 
 
 remote_write:
