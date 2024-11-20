@@ -16,6 +16,7 @@ const app = express();
 
 //path para lanzar dados
 app.get('/rolldice', (req, res) => {
+  const span = tracer.startSpan('http.request');
     const rolls = parseInt(req.query.rolls || '1', 10);
     if (isNaN(rolls)) {
       res
@@ -26,6 +27,12 @@ app.get('/rolldice', (req, res) => {
 
     requestCounter.add(1, {route: '/rolldice' }); //incrementar metrica
     res.send(JSON.stringify(rollTheDice(rolls, 1, 6)));
+
+    span.setAttribute('http.route', "/rolldice");
+    span.setAttribute('http.status_code', 200);
+
+    span.end();
+
   });
 
 //using histograms

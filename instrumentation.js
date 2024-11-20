@@ -1,10 +1,12 @@
 const { NodeSDK } = require('@opentelemetry/sdk-node');
-const { SimpleSpanProcessor, ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-base');
+const { SimpleSpanProcessor, ConsoleSpanExporter, BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
 const { Resource } = require('@opentelemetry/resources');
 const { trace, metrics, diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
 const { PeriodicExportingMetricReader, MeterProvider } = require('@opentelemetry/sdk-metrics');
 const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const {ZipkinExporter} = require('@opentelemetry/exporter-zipkin');
+const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
 
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
 
@@ -34,10 +36,20 @@ metrics.setGlobalMeterProvider(meterProvider);
 console.log(prometheusExporter); // Verifica que sea una instancia válida
 
 
+//Zipkin
+const zipkinExporter = new ZipkinExporter({
+  serviceName: 'dice-server',
+  url: 'http://localhost:9411/api/v2/spans',
+});
+
+const tracerProvider = new NodeTracerProvider({
+  spanProcessors: [new BatchSpanProcessor(zipkinExporter)]
+});
 // Configure the NodeSDK
 const sdk = new NodeSDK({
   resource,
-  spanProcessor: new SimpleSpanProcessor(new ConsoleSpanExporter()), // For spans
+  spanProcessor: new SimpleSpanProcessor(zipkinExporter), // For spans
+  traceExporter: zipkinExporter,
   instrumentations: [getNodeAutoInstrumentations()],
 });
 
