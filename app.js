@@ -1,7 +1,12 @@
-
+require('dotenv').config();
 const express = require('express');
 const {rollTheDice} = require('./dice.js');
 const { trace, metrics} = require('@opentelemetry/api');
+const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
+
+console.log("OTEL_TRACES_EXPORTER:", process.env.OTEL_TRACES_EXPORTER);
+console.log("OTEL_EXPORTER_ZIPKIN_ENDPOINT:", process.env.OTEL_EXPORTER_ZIPKIN_ENDPOINT);
+
 
 const tracer = trace.getTracer('dice-server', '0.1.0');
 const meter = metrics.getMeter('dice-server', '0.1.0');
@@ -9,6 +14,14 @@ const meter = metrics.getMeter('dice-server', '0.1.0');
 const requestCounter = meter.createCounter('http_request_total', {
   description: 'Total number of HTTP requests received'
 })
+
+const prometheusExporter = new PrometheusExporter({
+  endpoint: '/metrics',
+  port: 9191,
+}, () => {
+  console.log('Prometheus scrape endpoint: http://localhost:9191/metrics');
+});
+
 
 const PORT = parseInt(process.env.PORT || '8080');
 const app = express();

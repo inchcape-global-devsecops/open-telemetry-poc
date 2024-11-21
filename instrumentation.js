@@ -1,3 +1,4 @@
+/*
 const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { SimpleSpanProcessor, ConsoleSpanExporter, BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
 const { Resource } = require('@opentelemetry/resources');
@@ -57,3 +58,4 @@ const sdk = new NodeSDK({
 sdk.start();
 console.log('Telemetry initialized successfully.');
 console.log('Prometheus metrics available at http://localhost:9464/metrics');
+*/
