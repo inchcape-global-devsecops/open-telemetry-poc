@@ -5,7 +5,7 @@ scrape_configs:
     scrape_interval: 30s
     scrape_timeout: 20s
     static_configs: 
-      - targets: [localhost:9464]
+      - targets: ['172.17.0.1:9464']
 
 
 remote_write:

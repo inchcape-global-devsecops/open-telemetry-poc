@@ -1,5 +1,4 @@
-/*dice.js*/
-
+/*
 const {trace, metrics } = require('@opentelemetry/api');
 const tracer = trace.getTracer('dice-lib');
 const meter = metrics.getMeter('dice-lib');
@@ -15,38 +14,56 @@ const histogram = meter.createHistogram('dice_roll_duration', {
   description: 'duration of the dice roll(ms)'
 });
 
+
 //lanzamiento de un dado
 function rollOnce(min, max) {
   //nested spans: creates a child span for each roll that has parentspan's id as their parent ID
-  return tracer.startActiveSpan(`rollOnce:$(i)`, (span) => {
+ // return tracer.startActiveSpan(`rollOnce:$(i)`, (span) => {
     const result = Math.floor(Math.random() * (max - min + 1) + min);
     span.setAttribute('dicelib.rolled', result.toString());
     span.end();
     return result;
-  })
+ // })
   }
   
   //lanzar dados
   function rollTheDice(rolls, min, max) {
 
-    //create a span. A span must be closed
-    return tracer.startActiveSpan('rollTheDice', {attributes: {'dicelib.rolls': rolls.toString() } },
-     (span) => {
+    //create a span
+    //return tracer.startActiveSpan('rollTheDice', {attributes: {'dicelib.rolls': rolls.toString() } },
+     //(span) => {
       const result = [];
-      const startTime = new Date().getTime();
+     // const startTime = new Date().getTime();
       for (let i = 0; i < rolls; i++) {
         result.push(rollOnce(min, max));
       }
-      const endTime = new Date().getTime();
-      const duration =  endTime - startTime;
-      histogram.record(duration);
-      counter.add(rolls);
-      span.end();
+    //  const endTime = new Date().getTime();
+    //  const duration =  endTime - startTime;
+      //histogram.record(duration);
+      //counter.add(rolls);
+    //  span.end();
       return result;
-    });
+    //});
   }
   
   //get the current or active span
-  const activeSpan = trace.getActiveSpan();
+ // const activeSpan = trace.getActiveSpan();
 
   module.exports = { rollTheDice };
+*/
+
+
+  // Remove all metrics and traces
+function rollOnce(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function rollTheDice(rolls, min, max) {
+  const result = [];
+  for (let i = 0; i < rolls; i++) {
+    result.push(rollOnce(min, max));
+  }
+  return result;
+}
+
+module.exports = { rollTheDice };

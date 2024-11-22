@@ -15,16 +15,22 @@ docker network connect monitoring-network zipkin
 
 npm install
 
-Run app : node --require ./instrumentation.js app.js
+Run app : node --require ./instrumentation.js app.js or modify package.json: scripts: "start": "node -r ./instrumentation.js app.js"
 
+
+ZERO CODE autoinstrumentation:
 
 
 crear un archivo .env:
 
+OTEL_SERVICE_NNAME=dice-server
 OTEL_TRACES_EXPORTER=zipkin
 OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://localhost:9411/api/v2/spans
 OTEL_METRICS_EXPORTER=prometheus
-OTEL_EXPORTER_PROMETHEUS_ENDPOINT=http://localhost:9464/metrics
-OTEL_LOG_LEVEL=error
-NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+OTEL_EXPORTER_PROMETHEUS_ENDPOINT=9464
+OTEL_LOG_LEVEL=debug
 
+
+install npm install dotenv
+
+run npm start
