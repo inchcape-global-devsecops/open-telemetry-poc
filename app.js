@@ -5,7 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const { rollTheDice } = require('./dice.js');
 
-const PORT = parseInt(process.env.PORT || '8080');
+const PORT = parseInt(process.env.PORT || '8081');
 const app = express();
 
 app.get('/rolldice', (req, res) => {

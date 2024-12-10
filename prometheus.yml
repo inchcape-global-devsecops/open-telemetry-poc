@@ -1,11 +1,16 @@
 global:
   scrape_interval: 15s #consultation time and metrics acquisition
 scrape_configs:
-  - job_name: dice-service
+  - job_name: dice-service-v1
     scrape_interval: 30s
     scrape_timeout: 20s
     static_configs: 
-      - targets: ['172.17.0.1:9464']
+      - targets: ['dice-app-container:9464']
+
+  - job_name: dice-server-v2
+    scrape_interval: 30s
+    static_configs: 
+      - targets: ['dice-app-zero-container:9465']
 
 
 remote_write:

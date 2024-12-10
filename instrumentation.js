@@ -9,16 +9,16 @@ const {ZipkinExporter} = require('@opentelemetry/exporter-zipkin');
 
 
 const prometheusExporter = new PrometheusExporter({
-  port: process.env.OTEL_PROMETHEUS_PORT || 9464,
+  port: process.env.OTEL_PROMETHEUS_PORT || 9465,
 }, () => {
-  console.log('Prometheus scrape endpoint: http://localhost:9464/metrics');
+  console.log('Prometheus scrape endpoint: http://localhost:9465/metrics');
 });
 
 
 //Zipkin
 const zipkinExporter = new ZipkinExporter({
   url: process.env.OTEL_EXPORTER_ZIPKIN_ENDPOINT,
-  serviceName: 'dice-server'
+  serviceName: 'dice-server-v2'
 });
 
 
